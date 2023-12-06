@@ -1,0 +1,77 @@
+#Get number of sequences from each file by calling all @ symbols
+[ec-evanmv@int-2 aboral]$ zcat aboral-1_R1.fastq.gz | grep -c "^@"
+1000000
+[ec-evanmv@int-2 aboral]$ zcat aboral-1_R2.fastq.gz | grep -c "^@"
+1000000
+
+[ec-evanmv@int-2 aboral]$ zcat aboral-1_R1.fastq.gz | grep "^@" | head
+@NS500336:69:H5KLLAFXX:1:11101:19827:1048 1:N:0:CGCTCATT+NTTCGCCT
+@NS500336:69:H5KLLAFXX:1:11101:10714:1050 1:N:0:CGCTCATT+NTTCGCCT
+@NS500336:69:H5KLLAFXX:1:11101:8501:1050 1:N:0:CGCTCATT+NTTCGCCT
+@NS500336:69:H5KLLAFXX:1:11101:20889:1050 1:N:0:CGCTCATT+NTTCGCCT
+@NS500336:69:H5KLLAFXX:1:11101:3254:1050 1:N:0:CGCTCATT+NTTCGCCT
+@NS500336:69:H5KLLAFXX:1:11101:23010:1051 1:N:0:CGCTCATT+NTTCGCCT
+@NS500336:69:H5KLLAFXX:1:11101:7060:1053 1:N:0:CGCTCATT+NTTCGCCT
+@NS500336:69:H5KLLAFXX:1:11101:4582:1055 1:N:0:CGCTCATT+NTTCGCCT
+@NS500336:69:H5KLLAFXX:1:11101:8956:1056 1:N:0:CGCTCATT+NTTCGCCT
+@NS500336:69:H5KLLAFXX:1:11101:20748:1057 1:N:0:CGCTCATT+NTTCGCCT
+[ec-evanmv@int-2 aboral]$ zcat aboral-1_R2.fastq.gz | grep "^@" | head
+@NS500336:69:H5KLLAFXX:1:11101:19827:1048 2:N:0:CGCTCATT+NTTCGCCT
+@NS500336:69:H5KLLAFXX:1:11101:10714:1050 2:N:0:CGCTCATT+NTTCGCCT
+@NS500336:69:H5KLLAFXX:1:11101:8501:1050 2:N:0:CGCTCATT+NTTCGCCT
+@NS500336:69:H5KLLAFXX:1:11101:20889:1050 2:N:0:CGCTCATT+NTTCGCCT
+@NS500336:69:H5KLLAFXX:1:11101:3254:1050 2:N:0:CGCTCATT+NTTCGCCT
+@NS500336:69:H5KLLAFXX:1:11101:23010:1051 2:N:0:CGCTCATT+NTTCGCCT
+@NS500336:69:H5KLLAFXX:1:11101:7060:1053 2:N:0:CGCTCATT+NTTCGCCT
+@NS500336:69:H5KLLAFXX:1:11101:4582:1055 2:N:0:CGCTCATT+NTTCGCCT
+@NS500336:69:H5KLLAFXX:1:11101:8956:1056 2:N:0:CGCTCATT+NTTCGCCT
+@NS500336:69:H5KLLAFXX:1:11101:20748:1057 2:N:0:CGCTCATT+NTTCGCCT
+
+#FastQC for Ecoli files
+#500000 sequences for both files. 
+#Sequence length 150
+#Quality is good (green) up to about 105 bp for R1 and 135 for R2
+#Maybe a small amount of Illumina Universal Adapter
+
+#Trimmomatic run with output
+[ec-evanmv@int-2 fastqc_out]$ java -jar $EBROOTTRIMMOMATIC/trimmomatic-0.39.jar PE ../fastq/ecoli157/SRR957824_500K_R1.fastq.gz ../fastq/ecoli157/SRR957824_500K_R2.fastq.gz SRR957824_500K_R1_fastqc.zip SRR957824_500K_R2_fastqc.zip ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 SLIDINGWINDOW:4:20 LEADING:3 TRAILING:3
+TrimmomaticPE: Started with arguments:
+ ../fastq/ecoli157/SRR957824_500K_R1.fastq.gz ../fastq/ecoli157/SRR957824_500K_R2.fastq.gz SRR957824_500K_R1_fastqc.zip SRR957824_500K_R2_fastqc.zip ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 SLIDINGWINDOW:4:20 LEADING:3 TRAILING:3
+Quality encoding detected as phred33
+Input Read Pairs: 500000 Both Surviving: 428408 (85.68%) Forward Only Surviving: 71572 (14.31%) Reverse Only Surviving: 5 (0.00%) Dropped: 15 (0.00%)
+TrimmomaticPE: Completed successfully
+
+#Bowtie2 output
+Left reads:
+          Input     :    990454
+           Mapped   :    894085 (90.3% of input)
+            of these:     19365 ( 2.2%) have multiple alignments (218 have >20)
+Right reads:
+          Input     :    990454
+           Mapped   :    804125 (81.2% of input)
+            of these:     17556 ( 2.2%) have multiple alignments (214 have >20)
+85.7% overall read mapping rate.
+
+Aligned pairs:    754526
+     of these:     15502 ( 2.1%) have multiple alignments
+                   10813 ( 1.4%) are discordant alignments
+75.1% concordant pair alignment rate.
+
+#HISAT2 output 
+[ec-evanmv@int-2 evanmv]$ hisat2 -x ../../genome/hisat/MlScaffold09.ht -1 fastq/aboral/aboral-1_R1.fastq.gz -2 fastq/aboral/aboral-1_R2.fastq.gz -S evanmv_aboral_hisat2.sam --summary-file hisat_summary
+1000000 reads; of these:
+  1000000 (100.00%) were paired; of these:
+    177641 (17.76%) aligned concordantly 0 times
+    807667 (80.77%) aligned concordantly exactly 1 time
+    14692 (1.47%) aligned concordantly >1 times
+    ----
+    177641 pairs aligned concordantly 0 times; of these:
+      14745 (8.30%) aligned discordantly 1 time
+    ----
+    162896 pairs aligned 0 times concordantly or discordantly; of these:
+      325792 mates make up the pairs; of these:
+        192356 (59.04%) aligned 0 times
+        125779 (38.61%) aligned exactly 1 time
+        7657 (2.35%) aligned >1 times
+90.38% overall alignment rate
+

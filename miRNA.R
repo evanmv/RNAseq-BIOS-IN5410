@@ -26,3 +26,4 @@ vplot <- ggplot(sigmRNA.df) +
   theme_bw()
 
 ggplotly(vplot)
+ggsave("vplot_gg2.png")
